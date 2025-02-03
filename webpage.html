@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oil Price Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        .price {
+            font-size: 2em;
+            font-weight: bold;
+            color: #007BFF;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Real-Time Oil Price Tracker</h1>
+        <p>Current Oil Price: <span class="price" id="oilPrice">Loading...</span></p>
+        <p>Nifty Index: <span class="price" id="niftyIndex">Loading...</span></p>
+        <p>Sensex Index: <span class="price" id="sensexIndex">Loading...</span></p>
+    </div>
+    
+    <script>
+        async function fetchData() {
+            try {
+                const oilResponse = await fetch('https://api.oilpriceapi.com/v1/prices/latest', {
+                    headers: { 'Authorization': 'Bearer YOUR_API_KEY' }
+                });
+                const oilData = await oilResponse.json();
+                document.getElementById('oilPrice').innerText = `$${oilData.data.price}`;
+                
+                const stockResponse = await fetch('https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=NIFTY&interval=5min&apikey=YOUR_API_KEY');
+                const stockData = await stockResponse.json();
+                document.getElementById('niftyIndex').innerText = stockData['Time Series (5min)'][Object.keys(stockData['Time Series (5min)'])[0]]['1. open'];
+                
+                const sensexResponse = await fetch('https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=SENSEX&interval=5min&apikey=YOUR_API_KEY');
+                const sensexData = await sensexResponse.json();
+                document.getElementById('sensexIndex').innerText = sensexData['Time Series (5min)'][Object.keys(sensexData['Time Series (5min)'])[0]]['1. open'];
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+        
+        fetchData();
+        setInterval(fetchData, 60000); // Refresh every minute
+    </script>
+</body>
+</html>
